@@ -13,6 +13,53 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 )
 
+// Option configures PostgreSQL container options.
+type Option func(*config.PostgresConfig)
+
+// WithImage sets the Docker image for PostgreSQL.
+func WithImage(image string) Option {
+	return func(c *config.PostgresConfig) {
+		c.Image = image
+	}
+}
+
+// WithUsername sets the PostgreSQL username.
+func WithUsername(username string) Option {
+	return func(c *config.PostgresConfig) {
+		c.Username = username
+	}
+}
+
+// WithPassword sets the PostgreSQL password.
+func WithPassword(password string) Option {
+	return func(c *config.PostgresConfig) {
+		c.Password = password
+	}
+}
+
+// WithDatabase sets the PostgreSQL database name.
+func WithDatabase(database string) Option {
+	return func(c *config.PostgresConfig) {
+		c.Database = database
+	}
+}
+
+// WithHealthCheckTimeout sets the health check timeout duration.
+func WithHealthCheckTimeout(timeout time.Duration) Option {
+	return func(c *config.PostgresConfig) {
+		c.HealthCheckTimeout = timeout
+	}
+}
+
+// WithPoolSettings configures the connection pool.
+func WithPoolSettings(maxOpen, maxIdle int, maxLifetime time.Duration) Option {
+	return func(c *config.PostgresConfig) {
+		c.MaxOpenConns = maxOpen
+		c.MaxIdleConns = maxIdle
+		c.ConnMaxLifetime = maxLifetime
+	}
+}
+
 // New starts a new PostgreSQL container and returns a connected *sql.DB.
 // Call the returned cleanup function to stop and remove the container.
 //
@@ -26,6 +73,15 @@ import (
 //	defer cleanup()
 func New(ctx context.Context) (*sql.DB, func(), error) {
 	cfg := config.DefaultPostgresConfig()
+	return NewWithConfig(ctx, cfg)
+}
+
+// NewWithOptions starts a PostgreSQL container with functional options.
+func NewWithOptions(ctx context.Context, opts ...Option) (*sql.DB, func(), error) {
+	cfg := config.DefaultPostgresConfig()
+	for _, opt := range opts {
+		opt(cfg)
+	}
 	return NewWithConfig(ctx, cfg)
 }
 
@@ -45,14 +101,12 @@ func NewWithConfig(ctx context.Context, cfg *config.PostgresConfig) (*sql.DB, fu
 		return nil, nil, fmt.Errorf("failed to start postgres container: %w", err)
 	}
 
-	host, portStr, err := pgContainer.HostPort(ctx, 5432)
+	// Get connection details using ConnectionString
+	dsn, err := pgContainer.ConnectionString(ctx)
 	if err != nil {
 		pgContainer.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to get host port: %w", err)
+		return nil, nil, fmt.Errorf("failed to get connection string: %w", err)
 	}
-
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, portStr, dbUser, dbPassword, dbName)
 
 	pool, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -60,9 +114,10 @@ func NewWithConfig(ctx context.Context, cfg *config.PostgresConfig) (*sql.DB, fu
 		return nil, nil, fmt.Errorf("failed to open db: %w", err)
 	}
 
-	pool.SetMaxOpenConns(10)
-	pool.SetMaxIdleConns(5)
-	pool.SetConnMaxLifetime(time.Hour)
+	// Apply pool settings from config
+	pool.SetMaxOpenConns(cfg.MaxOpenConns)
+	pool.SetMaxIdleConns(cfg.MaxIdleConns)
+	pool.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 
 	ctx, cancel := context.WithTimeout(ctx, cfg.HealthCheckTimeout)
 	defer cancel()
@@ -79,4 +134,43 @@ func NewWithConfig(ctx context.Context, cfg *config.PostgresConfig) (*sql.DB, fu
 	}
 
 	return pool, cleanup, nil
+}
+
+// MustNew starts a PostgreSQL container and panics on error.
+// Use for tests where you want quick setup.
+func MustNew(ctx context.Context) (*sql.DB, func()) {
+	db, cleanup, err := New(ctx)
+	if err != nil {
+		panic("postgres.MustNew: " + err.Error())
+	}
+	return db, cleanup
+}
+
+// MustNewWithOptions starts a PostgreSQL container with options and panics on error.
+func MustNewWithOptions(ctx context.Context, opts ...Option) (*sql.DB, func()) {
+	db, cleanup, err := NewWithOptions(ctx, opts...)
+	if err != nil {
+		panic("postgres.MustNewWithOptions: " + err.Error())
+	}
+	return db, cleanup
+}
+
+// Container exposes the underlying testcontainers PostgreSQL module for advanced use.
+func Container(ctx context.Context, opts ...Option) (*postgres.PostgresContainer, error) {
+	cfg := config.DefaultPostgresConfig()
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	pgContainer, err := postgres.Run(ctx,
+		cfg.Image,
+		postgres.WithDatabase(cfg.Database),
+		postgres.WithUsername(cfg.Username),
+		postgres.WithPassword(cfg.Password),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create postgres container: %w", err)
+	}
+
+	return pgContainer, nil
 }
