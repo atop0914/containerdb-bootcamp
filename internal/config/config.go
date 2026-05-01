@@ -17,6 +17,12 @@ type MySQLConfig struct {
 	Database string
 	// HealthCheckTimeout for container readiness. Defaults to 30s
 	HealthCheckTimeout time.Duration
+	// MaxOpenConns is the max number of open connections. Defaults to 10
+	MaxOpenConns int
+	// MaxIdleConns is the max number of idle connections. Defaults to 5
+	MaxIdleConns int
+	// ConnMaxLifetime is the max lifetime of a connection. Defaults to 1 hour
+	ConnMaxLifetime time.Duration
 }
 
 // DefaultMySQLConfig returns a config with sensible defaults.
@@ -27,6 +33,9 @@ func DefaultMySQLConfig() *MySQLConfig {
 		Password:           "rootpassword",
 		Database:           "testdb",
 		HealthCheckTimeout: 30 * time.Second,
+		MaxOpenConns:       10,
+		MaxIdleConns:       5,
+		ConnMaxLifetime:    time.Hour,
 	}
 }
 
@@ -42,6 +51,12 @@ type PostgresConfig struct {
 	Database string
 	// HealthCheckTimeout. Defaults to 30s
 	HealthCheckTimeout time.Duration
+	// MaxOpenConns is the max number of open connections. Defaults to 10
+	MaxOpenConns int
+	// MaxIdleConns is the max number of idle connections. Defaults to 5
+	MaxIdleConns int
+	// ConnMaxLifetime is the max lifetime of a connection. Defaults to 1 hour
+	ConnMaxLifetime time.Duration
 }
 
 // DefaultPostgresConfig returns a config with sensible defaults.
@@ -52,5 +67,8 @@ func DefaultPostgresConfig() *PostgresConfig {
 		Password:           "postgres",
 		Database:           "testdb",
 		HealthCheckTimeout: 30 * time.Second,
+		MaxOpenConns:       10,
+		MaxIdleConns:       5,
+		ConnMaxLifetime:    time.Hour,
 	}
 }
