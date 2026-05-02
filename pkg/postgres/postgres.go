@@ -101,14 +101,14 @@ func NewWithConfig(ctx context.Context, cfg *config.PostgresConfig) (*sql.DB, fu
 		return nil, nil, fmt.Errorf("failed to start postgres container: %w", err)
 	}
 
-	// Get connection details using ConnectionString
-	dsn, err := pgContainer.ConnectionString(ctx)
+	// Get connection details using ConnectionString (v0.42.0+ API)
+	connStr, err := pgContainer.ConnectionString(ctx)
 	if err != nil {
 		pgContainer.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to get connection string: %w", err)
 	}
 
-	pool, err := sql.Open("postgres", dsn)
+	pool, err := sql.Open("postgres", connStr)
 	if err != nil {
 		pgContainer.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to open db: %w", err)

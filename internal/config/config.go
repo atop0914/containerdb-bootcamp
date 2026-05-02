@@ -72,3 +72,22 @@ func DefaultPostgresConfig() *PostgresConfig {
 		ConnMaxLifetime:    time.Hour,
 	}
 }
+
+// SQLiteConfig holds configuration for SQLite databases.
+type SQLiteConfig struct {
+	// Mode determines the database mode: "memory", "temp", or "file"
+	Mode string
+	// Path is the file path (used when Mode is "file")
+	Path string
+	// Cache controls the cache mode: "shared", "private", "write"
+	Cache string
+}
+
+// DefaultSQLiteConfig returns a config with sensible defaults (in-memory).
+func DefaultSQLiteConfig() *SQLiteConfig {
+	return &SQLiteConfig{
+		Mode:  "memory",
+		Path:  "",
+		Cache: "shared",
+	}
+}

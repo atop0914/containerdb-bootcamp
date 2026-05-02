@@ -41,25 +41,14 @@ func NewWithConfig(ctx context.Context, cfg *config.MySQLConfig) (*sql.DB, func(
 		return nil, nil, fmt.Errorf("failed to start mysql container: %w", err)
 	}
 
-	// Get connection details
-	hostPort, err := mysqlContainer.Port(ctx, 3306)
+	// Get connection details using ConnectionString (v0.42.0+ API)
+	connStr, err := mysqlContainer.ConnectionString(ctx)
 	if err != nil {
 		mysqlContainer.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to get port: %w", err)
+		return nil, nil, fmt.Errorf("failed to get connection string: %w", err)
 	}
 
-	host, portStr, err := mysqlContainer.HostPort(ctx, 3306)
-	if err != nil {
-		mysqlContainer.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to get host port: %w", err)
-	}
-
-	// Build DSN
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		cfg.Username, cfg.Password, host, portStr, cfg.Database)
-
-	// Wait for MySQL to be ready (using hostPort which includes the mapped port)
-	pool, err := sql.Open("mysql", dsn)
+	pool, err := sql.Open("mysql", connStr)
 	if err != nil {
 		mysqlContainer.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to open db: %w", err)
