@@ -21,7 +21,7 @@ A lightweight containerized database toolkit for Go development and testing. Spi
 | Day 3 | 实现 PostgreSQL 容器封装 | ✅ done |
 | Day 4 | 实现 SQLite 辅助工具（in-memory/temp file） | ✅ done |
 | Day 5 | 编写基础单元测试，覆盖核心 API | ✅ done |
-| Day 6 | 添加 CLI 工具，支持启动/停止/状态查看 | todo |
+| Day 6 | 添加 CLI 工具，支持启动/停止/状态查看 | ✅ done |
 | Day 7 | 休息日 | — |
 
 ### Week 2 — 高级功能与完善
