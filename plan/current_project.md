@@ -28,7 +28,7 @@ A lightweight containerized database toolkit for Go development and testing. Spi
 
 | 日期 | 任务 | 状态 |
 |------|------|------|
-| Day 8 | 添加连接池配置、健康检查增强 | todo |
+| Day 8 | 添加连接池配置、健康检查增强 | ✅ done |
 | Day 9 | 实现数据迁移辅助工具（migrate integration） | todo |
 | Day 10 | 添加 Docker Compose 兼容模式 | todo |
 | Day 11 | 完善文档，编写使用指南 | todo |
@@ -40,16 +40,14 @@ A lightweight containerized database toolkit for Go development and testing. Spi
 https://github.com/atop0914/containerdb-bootcamp
 
 ## 当前阶段
-**Week 1 - Day 5 完成**
+**Week 1 - Day 8 完成**
 
-Day 5 完成内容：
-- ✅ 为 mysql 包添加 functional options 模式（WithImage, WithUsername, WithPassword, WithDatabase, WithHealthCheckTimeout, WithPoolSettings）
-- ✅ 添加 MustNew, MustNewWithOptions, NewWithOptionsContainer 便捷函数
-- ✅ 编写 mysql 包完整单元测试（9个测试用例）
-- ✅ 添加 internal/config 配置包单元测试（6个测试用例）
-- ✅ 添加 internal/container 工具包单元测试（4个测试用例）
-- ✅ 添加 internal/database 数据库包装器单元测试（6个测试用例）
-- ✅ go mod tidy 解决依赖问题
+Day 8 完成内容：
+- ✅ 添加 `internal/health` 健康检查包，支持重试逻辑
+- ✅ 添加 `internal/pool` 连接池监控包，获取统计数据
+- ✅ MySQL 和 PostgreSQL 配置新增 `HealthCheckRetries` 和 `HealthCheckInterval` 选项
+- ✅ 新增 `WithHealthCheckRetry` 和 `WithHealthCheckInterval` 函数选项
+- ✅ 编写健康检查和连接池监控的单元测试
 
 ## 下一步
-等待 Day 6 任务：添加 CLI 工具，支持启动/停止/状态查看。
+等待 Day 9 任务：实现数据迁移辅助工具（migrate integration）。

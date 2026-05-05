@@ -105,3 +105,24 @@
 - cmd/containerdb/commands/stop.go: 停止容器指导
 - cmd/containerdb/commands_test/cli_test.go: CLI 单元测试
 - go.mod: 添加 cobra 依赖
+
+## 2026-05-05 (Day 8) ✅
+- 添加 `internal/health` 健康检查包，支持重试逻辑
+- 添加 `internal/pool` 连接池监控包，获取统计数据
+- MySQL 和 PostgreSQL 配置新增 `HealthCheckRetries` 和 `HealthCheckInterval` 选项
+- 新增 `WithHealthCheckRetry` 和 `WithHealthCheckInterval` 函数选项
+- 编写健康检查和连接池监控的单元测试
+- ✅ 成功推送到 GitHub dev 分支 (1 commit)
+
+### Commits:
+- f2fc88e feat: add connection pool monitoring and health check utilities
+
+### Day 8 详细改动:
+- internal/health/health.go: 新增健康检查包，含 Check、WaitForReady 函数
+- internal/health/health_test.go: 新增健康检查单元测试（8个测试用例）
+- internal/pool/pool.go: 新增连接池监控包，含 Stats、Configure、Monitor、TracedDB
+- internal/pool/pool_test.go: 新增连接池监控单元测试（10个测试用例）
+- internal/config/config.go: MySQLConfig 和 PostgresConfig 新增 HealthCheckRetries、HealthCheckInterval
+- pkg/mysql/mysql.go: 新增 WithHealthCheckRetry、WithHealthCheckInterval 选项
+- pkg/mysql/mysql_test.go: 修复 MaxIdleConnections -> MaxIdleConns
+- pkg/postgres/postgres.go: 新增 WithHealthCheckRetry、WithHealthCheckInterval 选项
