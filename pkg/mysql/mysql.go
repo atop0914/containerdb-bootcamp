@@ -60,6 +60,24 @@ func WithPoolSettings(maxOpen, maxIdle int, maxLifetime time.Duration) Option {
 	}
 }
 
+// WithHealthCheckRetry configures health check retry attempts.
+func WithHealthCheckRetry(retries int) Option {
+	return func(cfg *config.MySQLConfig) {
+		if retries > 0 {
+			cfg.HealthCheckRetries = retries
+		}
+	}
+}
+
+// WithHealthCheckInterval configures the interval between health check retries.
+func WithHealthCheckInterval(interval time.Duration) Option {
+	return func(cfg *config.MySQLConfig) {
+		if interval > 0 {
+			cfg.HealthCheckInterval = interval
+		}
+	}
+}
+
 // New starts a new MySQL container and returns a connected *sql.DB.
 // Call the returned cleanup function to stop and remove the container.
 //

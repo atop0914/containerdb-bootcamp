@@ -60,6 +60,24 @@ func WithPoolSettings(maxOpen, maxIdle int, maxLifetime time.Duration) Option {
 	}
 }
 
+// WithHealthCheckRetry configures health check retry attempts.
+func WithHealthCheckRetry(retries int) Option {
+	return func(c *config.PostgresConfig) {
+		if retries > 0 {
+			c.HealthCheckRetries = retries
+		}
+	}
+}
+
+// WithHealthCheckInterval configures the interval between health check retries.
+func WithHealthCheckInterval(interval time.Duration) Option {
+	return func(c *config.PostgresConfig) {
+		if interval > 0 {
+			c.HealthCheckInterval = interval
+		}
+	}
+}
+
 // New starts a new PostgreSQL container and returns a connected *sql.DB.
 // Call the returned cleanup function to stop and remove the container.
 //
